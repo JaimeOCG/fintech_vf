@@ -11,11 +11,58 @@ class CNAE_Transformer(BaseEstimator, TransformerMixin):
     def fit(self, X, y=None):
         return self
 
+    def conditions(self, df_rf):
+        if df_rf['cnae'] < 510:
+            return 'A'
+        elif df_rf['cnae'] >= 510 and df_rf['cnae'] < 1011:
+            return 'B'
+        elif df_rf['cnae'] >= 1011 and df_rf['cnae'] < 3512:
+            return 'C'
+        elif df_rf['cnae'] >= 3512 and df_rf['cnae'] < 3600:
+            return 'D'
+        elif df_rf['cnae'] >= 3600 and df_rf['cnae'] < 4110:
+            return 'E'
+        elif df_rf['cnae'] >= 4110 and df_rf['cnae'] < 4511:
+            return 'F'
+        elif df_rf['cnae'] >= 4511 and df_rf['cnae'] < 4910:
+            return 'G'
+        elif df_rf['cnae'] >= 4910 and df_rf['cnae'] < 5510:
+            return 'H'
+        elif df_rf['cnae'] >= 5510 and df_rf['cnae'] < 5811:
+            return 'I'
+        elif df_rf['cnae'] >= 5811 and df_rf['cnae'] < 6411:
+            return 'J'
+        elif df_rf['cnae'] >= 6411 and df_rf['cnae'] < 6810:
+            return 'K'
+        elif df_rf['cnae'] >= 6810 and df_rf['cnae'] < 6910:
+            return 'L'
+        elif df_rf['cnae'] >= 6910 and df_rf['cnae'] < 7711:
+            return 'M'
+        elif df_rf['cnae'] >= 7711 and df_rf['cnae'] < 8411:
+            return 'N'
+        elif df_rf['cnae'] >= 8411 and df_rf['cnae'] < 8510:
+            return 'O'
+        elif df_rf['cnae'] >= 8510 and df_rf['cnae'] < 8610:
+            return 'P'
+        elif df_rf['cnae'] >= 8610 and df_rf['cnae'] < 9001:
+            return 'Q'
+        elif df_rf['cnae'] >= 9001 and df_rf['cnae'] < 9411:
+            return 'R'
+        elif df_rf['cnae'] >= 9411 and df_rf['cnae'] < 9700:
+            return 'S'
+        elif df_rf['cnae'] >= 9700 and df_rf['cnae'] < 9900:
+            return 'T'
+        elif df_rf['cnae'] >= 9900:
+            return 'S'
+        else:
+            return 'Unknown'
+
     # Transformer method we wrote for this transformer
     def transform(self, X, y=None):
         X = X.copy()
-        X.cnae = X.cnae.astype(str).str.strip()
-        X.loc[:, "sector"] = X.cnae.astype(str).str[:2]
+        X = X.dropna(subset=['cnae'])
+        X.cnae = X.cnae.astype(int)
+        X.loc[:, "sector"] = X.apply(self.conditions, axis=1)
 
         X = X.replace({"sector": ""}, "missing")
         return X
