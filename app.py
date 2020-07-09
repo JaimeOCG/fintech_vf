@@ -341,14 +341,14 @@ def company():
             except:
                 log_operating_income = 0.0
 
-            X = pd.DataFrame({'ebitda_income': [ebitda_income], \
-                              'debt_ebitda': [debt_ebitda], \
-                              'rraa_rrpp' : [rraa_rrpp], \
-                              'log_operating_income' : [log_operating_income], \
+            X = pd.DataFrame({'p40100_mas_40500_h1': [form.p40100_plus_40500.data], \
+                              'p10000_h1': [form.p10000.data], \
+                              'p20000_h1' : [form.p20000.data], \
                               'cnae' : [form.sector.data]
                               })
+
             prob_default = Rating_EnhancedModel.predict_proba(X)[:,1]
-        
+            print(prob_default)
             try: # UPDATING DATA OF AN EXISTING COMPANY
                 company = Company.query.filter(Company.username.in_([current_user.username]),Company.nif.in_([form.nif.data])).first()
                 company.nif = form.nif.data
@@ -412,7 +412,8 @@ def company():
 
         if limite_acepted - used_amount < order.loan_amount:
             automated_decision = 'rejected'
-        elif prob_default > 0.00000000000000001:
+        #Asumimos un 4% de probabilidad de default
+        elif prob_default > 0.04:
             automated_decision = 'rejected'
         
         try:
