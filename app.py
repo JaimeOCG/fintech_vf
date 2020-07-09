@@ -412,7 +412,7 @@ def company():
 
         if limite_acepted - used_amount < order.loan_amount:
             automated_decision = 'rejected'
-        #asumimos un 4% de probabilidad de default
+        #Asumimos un 4% de probabilidad de default
         elif prob_default > 0.04:
             automated_decision = 'rejected'
         
