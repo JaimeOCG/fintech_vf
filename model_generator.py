@@ -61,36 +61,8 @@ print(classification_report(y_train, y_pred))
 print("classification report for test")
 print(classification_report(y_test, y_pred_test))
 
-# Clasificador Random Forest
-rf_class = RandomForestClassifier(n_estimators=50, random_state=1234, class_weight={0: 0.1, 1: 0.9}, n_jobs=-1)
-
-model = rf_class.fit(X_train, y_train)
-
-y_pred = model.predict(X_train)
-y_pred_test = model.predict(X_test)
-
-# Métricas para el modelo Random Forest
-
-from sklearn.metrics import accuracy_score
-
-print("Accuracy train: {0}".format(accuracy_score(y_pred, y_train)))
-
-print("Accuracy test: {0}".format(accuracy_score(y_pred_test, y_test)))
-
-from sklearn.metrics import classification_report
-
-print("classification report for train")
-print(classification_report(y_train, y_pred))
-
-print("classification report for test")
-print(classification_report(y_test, y_pred_test))
-
-# AUC
-
-fpr, tpr, thresholds = metrics.roc_curve(y_test, y_pred_test)
-print("AUC: {0: .4f}".format(metrics.auc(fpr, tpr)))
 
 print("SAVING THE PERSISTENT MODEL...")
 from joblib import dump  # , load
 
-dump(model, 'database/Rating_EnhancedModel.joblib')
+dump(full_pipeline_m, 'database/Rating_EnhancedModel.joblib')
