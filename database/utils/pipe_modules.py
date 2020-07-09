@@ -127,10 +127,10 @@ class GroupNormalizer(BaseEstimator, TransformerMixin):
 
                 mean = impute_sector.xs("mean", level=1, axis=1)
                 std = impute_sector.xs("std", level=1, axis=1)
-                x[self.target] = (x[self.target] - mean.iloc[0]) - (x[self.target] - std.iloc[0])
+                #x.loc[:, self.target] = (x[self.target] - self.impute_map_total.loc['mean'])
+                x[self.target] = (x[self.target] - mean.iloc[0]).div(std.iloc[0])
             else:
-                x.loc[:, self.target] = (x[self.target] - self.impute_map_total.loc['mean']) / \
-                                        self.impute_map_total.loc['std']
+                x.loc[:, self.target] = (x[self.target] - self.impute_map_total.loc['mean']).div(self.impute_map_total.loc['std'])
             df_normalized = df_normalized.append(x)
         return df_normalized
 
