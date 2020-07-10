@@ -109,16 +109,14 @@ class Company(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     nif = db.Column(db.String(9))
     name = db.Column(db.String(50))
-    p10000 = db.Column(db.Float)
-    p20000 = db.Column(db.Float)
+    p49100 = db.Column(db.Float)
+    p40800 = db.Column(db.Float)
     p40100_plus_40500 = db.Column(db.Float)
     p49100_plus_40800 = db.Column(db.Float)
-    p31200_plus_32300 = db.Column(db.Float)
-    ebitda_income = db.Column(db.Float)
-    debt_ebitda = db.Column(db.Float)
-    rraa_rrpp = db.Column(db.Float) # Leveraging - External Resources / Own Resources - Recursos Ajenos / recursos propios
-    log_operating_income = db.Column(db.Float)
-    prob_default = db.Column(db.Float)
+    p31200 = db.Column(db.Float)
+    p32300 = db.Column(db.Float)
+    p10000 = db.Column(db.Float)
+    p20000 = db.Column(db.Float)
     username = db.Column(db.String(15))    
     data_timestamp = db.Column(db.DateTime, default=datetime.utcnow)
     sector=db.Column(db.String(20))
@@ -158,12 +156,15 @@ class CompanyForm(FlaskForm):
     loan_amount = MyFloatField('Loan Amount / Valor del Prestámo', validators=[InputRequired()])
     number_of_installments = SelectField('Number of Installments / Número de Pago', choices=[('1', '1'), ('2', '2'), ('3', '3'), ('4', '4'),('5', '5'), ('6', '6'), ('7', '7'), ('8', '8')])           
     nif = StringField('Id of the Company / NIF de su Empresa', validators=[InputRequired(), Length(min=9, max=9)],default='')    
-    name = StringField('Name of your Company / Nombre/Razón Social de su Empresa', validators=[InputRequired(), Length(min=3, max=50)])
+    name = StringField('Name of your Company / Nombre/ Razón Social de su Empresa', validators=[InputRequired(), Length(min=3, max=50)])
+    p49100 = MyFloatField('Profit / Resultado del ejercicio', validators=[InputRequired()])
+    p40800 = MyFloatField('Amortization / Amortización', validators=[InputRequired()])
     p40100_plus_40500 = MyFloatField('Operating Income / Ingresos', validators=[InputRequired()])
     p49100_plus_40800 = MyFloatField('EBITDA', validators=[InputRequired()])
+    p31200 = MyFloatField('Short Term Debt / Deuda a corto plazo', validators=[InputRequired()])
+    p32300 = MyFloatField('Long Term Debt / Deuda a largo plazo', validators=[InputRequired()])
     p10000 = MyFloatField('Total Assets / Total activos', validators=[InputRequired()])
     p20000 = MyFloatField('Own Capital / Patrimonio neto', validators=[InputRequired()])
-    p31200_plus_32300 = MyFloatField('Total Debt / Deuda total', validators=[InputRequired()])
     sector = StringField('CNAE Code / Código CNAE', validators=[InputRequired(), Length(min=2, max=20)],default='')
 
 
@@ -271,12 +272,17 @@ def loan():
                                 loan_amount = form.loan_amount.data, \
                                 number_of_installments = form.number_of_installments.data, \
                                 name = company.name, \
+                                p49100 = company.p49100, \
+                                p40800 = company.p40800, \
                                 p40100_plus_40500 = company.p40100_plus_40500, \
-                                p31200_plus_32300 = company.p31200_plus_32300, \
-                                p49100_plus_40800 = company.p49100_plus_40800, \
+                                p49100_plus_40800 = company.p40100_plus_40500, \
+                                p31200 = company.p31200, \
+                                p32300 = company.p32300, \
                                 p10000 = company.p10000, \
-                                p20000 = company.p20000
-                                )               
+                                p20000 = company.p20000, \
+                                username = current_user.username, \
+                                sector= form.sector.data
+                                )              
                 message = ''
             except:
                 form = CompanyForm(orderid=str(rowid), \
@@ -341,8 +347,12 @@ def company():
             except:
                 log_operating_income = 0.0
 
-            X = pd.DataFrame({'p40100_mas_40500_h1': [form.p40100_plus_40500.data], \
-                              'p10000_h1': [form.p10000.data], \
+            X = pd.DataFrame({'p49100_h1': [form.p49100.data], \
+                              'p40800_h1': [form.p40800.data], \
+                              'p40100_mas_40500_h1' : [form.p40100_plus_40500.data], \
+                              'p31200_h1' : [form.p31200.data], \
+                              'p32300_h1' : [form.p32300.data], \
+                              'p10000_h1' : [form.p10000.data], \
                               'p20000_h1' : [form.p20000.data], \
                               'cnae' : [form.sector.data]
                               })
@@ -357,35 +367,31 @@ def company():
                 update_or_new = 0 # 0 for new                
 
             if update_or_new == 1: # UPDATING DATA FROM AN EXISTING COMPANY
-                company.sector = form.sector.data
                 company.name = form.name.data
-                company.p10000 = form.p10000.data
-                company.p20000 = form.p20000.data
+                company.p49100 = form.p49100.data
+                company.p40800 = form.p40800.data
                 company.p40100_plus_40500 = form.p40100_plus_40500.data
                 company.p49100_plus_40800 = form.p49100_plus_40800.data
-                company.p31200_plus_32300 = form.p31200_plus_32300.data
-                company.ebitda_income = ebitda_income
-                company.debt_ebitda = debt_ebitda
-                company.rraa_rrpp = rraa_rrpp
-                company.prob_default = prob_default
-                company.log_operating_income = log_operating_income 
+                company.p31200 = form.p31200.data
+                company.p32300 = form.p32300.data
+                company.p10000 = form.p10000.data
+                company.p20000 = form.p20000.data
                 company.username = current_user.username
+                company.sector = form.sector.data
                 db.session.commit()
                 message = 'Company data updated!'
             else: # CREATING A NEW COMPANY
                 new_company = Company(
                         nif = form.nif.data, \
                         name = form.name.data, \
-                        p10000 = form.p10000.data, \
-                        p20000 = form.p20000.data, \
+                        p49100 = form.p49100.data, \
+                        p40800 = form.p40800.data, \
                         p40100_plus_40500 = form.p40100_plus_40500.data, \
                         p49100_plus_40800 = form.p49100_plus_40800.data, \
-                        p31200_plus_32300 = form.p31200_plus_32300.data, \
-                        ebitda_income = ebitda_income, \
-                        debt_ebitda = debt_ebitda, \
-                        rraa_rrpp = rraa_rrpp, \
-                        prob_default = prob_default, \
-                        log_operating_income = log_operating_income, \
+                        p31200 = form.p31200.data, \
+                        p32300 = form.p32300.data, \
+                        p10000 = form.p10000.data, \
+                        p20000 = form.p20000.data, \
                         username = current_user.username, \
                         sector= form.sector.data
                         )
