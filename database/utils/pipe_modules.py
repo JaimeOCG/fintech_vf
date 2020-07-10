@@ -6,7 +6,14 @@ import numpy as np
 
 
 class CNAE_Transformer(BaseEstimator, TransformerMixin):
-
+    '''
+    Class for replacing cnae code to sector group.
+    Parameters
+    ----------
+    Returns
+    -------
+    X : DataFrame with new sector column
+    '''
     # Return self nothing else to do here
     def fit(self, X, y=None):
         return self
@@ -96,8 +103,7 @@ class GroupNormalizer(BaseEstimator, TransformerMixin):
 
     Returns
     -------
-    X : array-like
-        The array with imputed values in the target column
+    X : pd.DataFrame with normalized columns by sector
     '''
 
     def __init__(self, group_cols, target):
