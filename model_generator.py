@@ -22,7 +22,7 @@ categorical_features = ["sector"]
 
 # Numerical features to pass down the numerical pipeline
 #numerical_features = X.select_dtypes(['int', 'float']).columns.tolist()
-numerical_features = ["p40100_mas_40500_h1","p10000_h1","p20000_h1"]
+numerical_features = ["p49100_h1","p40800_h1","p40100_mas_40500_h1","p31200_h1","p32300_h1","p10000_h1","p20000_h1"]
 
 preprocessing = Pipeline([("CNAE_Transformer", CNAE_Transformer()), ("Mean_Imputer", Mean_Imputer()),
                           ])
@@ -41,7 +41,7 @@ full_pipeline = FeatureUnion(transformer_list=[('categorical_pipeline', categori
 
 full_pipeline_m = Pipeline(steps=[('full_pipeline', full_pipeline),
 
-                                  ('model', RandomForestClassifier(n_estimators=50, random_state=1234,
+                                  ('model', RandomForestClassifier(n_estimators=1000, random_state=1234,
                                                                    class_weight={0: 0.1, 1: 0.9}, n_jobs=-1))])
 
 full_pipeline_m.fit(X_train, y_train)
@@ -72,4 +72,4 @@ print("AUC: {0: .4f}".format(metrics.auc(fpr, tpr)))
 print("SAVING THE PERSISTENT MODEL...")
 from joblib import dump  # , load
 
-dump(full_pipeline_m, 'database/Rating_EnhancedModel.joblib')
+dump(full_pipeline_m, 'database/Rating_EnhancedModel.joblib', compress=4)
